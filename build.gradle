@@ -14,9 +14,6 @@ jar {
 repositories {
     jcenter()
 	mavenCentral()
-	flatDir {
-		dirs '../core/libs'
-	}
 }
 
 dependencies {
@@ -29,4 +26,10 @@ dependencies {
 javadoc {
 	source = sourceSets.main.allJava
 	classpath = configurations.compile
+}
+
+task listJars {
+    doLast {
+        configurations.compile.each { File file -> println file.name }
+    }
 }
