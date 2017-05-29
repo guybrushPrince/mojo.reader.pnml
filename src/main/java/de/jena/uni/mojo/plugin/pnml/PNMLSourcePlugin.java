@@ -19,10 +19,11 @@
 package de.jena.uni.mojo.plugin.pnml;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import de.jena.uni.mojo.analysis.information.AnalysisInformation;
-import de.jena.uni.mojo.error.Annotation;
 import de.jena.uni.mojo.interpreter.IdInterpreter;
 import de.jena.uni.mojo.plugin.SourcePlugin;
 import de.jena.uni.mojo.plugin.pnml.interpreter.PNMLIdInterpreter;
@@ -52,25 +53,20 @@ public class PNMLSourcePlugin implements SourcePlugin {
 	}
 
 	@Override
-	public Reader getReader(File file, AnalysisInformation information) {
-		return new PNMLReader(file, information);
+	public Reader getReader(String processName, File file, AnalysisInformation information, Charset encoding)
+			throws IOException {
+		String stream = String.join("", Files.readAllLines(file.toPath(), encoding));
+		return new PNMLReader(processName, stream, information, encoding);
+	}
+
+	@Override
+	public Reader getReader(String processName, String stream, AnalysisInformation information, Charset encoding) {
+		return new PNMLReader(processName, stream, information, encoding);
 	}
 
 	@Override
 	public IdInterpreter getIdInterpreter() {
 		return new PNMLIdInterpreter();
-	}
-
-	@Override
-	public List<Annotation> verify(File file, AnalysisInformation info) {
-		// TODO
-		return null;
-	}
-
-	@Override
-	public List<Annotation> verify(String stream, AnalysisInformation info) {
-		// TODO
-		return null;
 	}
 
 }

@@ -18,10 +18,9 @@
  */
 package de.jena.uni.mojo.plugin.pnml.reader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,17 +59,27 @@ public class PNMLReader extends Reader {
 	 * A list of annotations that are important information.
 	 */
 	private final List<Annotation> annotations = new ArrayList<Annotation>();
+	
+	/**
+	 * An input stream of the file.
+	 */
+	private InputStream input;
 
 	/**
-	 * The constructor.
+	 * The constructor defines a new pnml reader.
 	 * 
-	 * @param file
-	 *            The file containing pnml code.
+	 * @param processName
+	 * 			  The name of the process.
+	 * @param stream
+	 *            An xml string.
 	 * @param analysisInformation
 	 *            The analysis information.
+	 * @param encoding
+	 * 			  The encoding used in the stream.
 	 */
-	public PNMLReader(File file, AnalysisInformation analysisInformation) {
-		super(file, analysisInformation);
+	public PNMLReader(String processName, String stream, AnalysisInformation analysisInformation, Charset encoding) {
+		super(processName, analysisInformation);
+		this.input = new ByteArrayInputStream(stream.getBytes(encoding));
 	}
 
 	@Override
@@ -79,13 +88,8 @@ public class PNMLReader extends Reader {
 			// Define a new petri net context.
 			PetriNetContext context = new PetriNetContext();
 
-			// Open a new file input stream
-			FileInputStream fileStream = new FileInputStream(file);
-
 			// Create a new xml reader
-			XMLInputFactory xif = XMLInputFactory.newInstance();
-			InputStreamReader in = new InputStreamReader(fileStream, "UTF-8");
-			XMLStreamReader xtr = xif.createXMLStreamReader(in);
+			XMLStreamReader xtr = XMLInputFactory.newInstance().createXMLStreamReader(input);
 
 			// Create a new BPMN parser and parse the xml file
 			PNMLParser parser = new PNMLParser();
@@ -95,15 +99,8 @@ public class PNMLReader extends Reader {
 			PetriNetTransformation transformation = new PetriNetTransformation();
 			transformation.transform(net, context);
 
-			try {
-				fileStream.close();
-			} catch (IOException e) {
-
-			}
-
 			parser = null;
 			xtr = null;
-			xif = null;
 			context = null;
 			transformation = null;
 
